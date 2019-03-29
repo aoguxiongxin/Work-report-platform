@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 
 import atest.test.com.app.R;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.IPresenter;
 import atest.test.com.app.view.fragment.BaseFragment;
 import rx.Observer;
@@ -92,7 +92,9 @@ public class NotificationFragment extends BaseFragment {
 
 
     private void initView(View view) {
-        tabLayout = (TabLayout) view.findViewById(R.id.notificationTablayout);
+        //获取头部的include
+        View inclutView = view.findViewById(R.id.NotificationTitleLayout);
+        tabLayout = (TabLayout) view.findViewById(R.id.TitleTabLayout);
         viewpager = (ViewPager) view.findViewById(R.id.notificationViewPager);
         sendNotifyFragment = new SendNotifyFragment();
         receiveNotifyFragment = new ReceiveNotifyFragment();

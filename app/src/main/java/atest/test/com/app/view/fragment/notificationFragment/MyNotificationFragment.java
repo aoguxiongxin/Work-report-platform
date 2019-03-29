@@ -20,7 +20,7 @@ import java.util.List;
 import atest.test.com.app.R;
 import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.notificationBean.MineSendMessageBean;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.IPresenter;
 import atest.test.com.app.presenter.notification.MineMessagePresenter;
 import atest.test.com.app.presenter.notification.StatusPresenter;

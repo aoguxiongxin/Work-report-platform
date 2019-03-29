@@ -27,14 +27,12 @@ public class CanAddViewImageView extends ImageView {
     private int marketRadius = 40;
     private Paint paint;
 
-
-
     public CanAddViewImageView(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public CanAddViewImageView(Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public CanAddViewImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -51,29 +49,21 @@ public class CanAddViewImageView extends ImageView {
         Paint mPaint = paint;
 
         this.setAlpha(1f);
-        if(delIsShow){
+        if (delIsShow) {
 //            int cx = getWidth()-marketRadius;
 //            int cy = marketRadius;
 //            canvas.drawCircle(cx,cy,marketRadius,mPaint);
 
-            Rect rect = new Rect(0,0,getWidth(),getHeight());
-            Bitmap bitmap = BitmapFactory.decodeResource(
-                    getContext().getResources(), R.drawable.ic_action_name);
+            Rect rect = new Rect(0, 0, getWidth(), getHeight());
+            Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.ic_action_name);
 
             this.setAlpha(0.3f);
-            canvas.drawBitmap(bitmap,rect,rect,paint);
+            canvas.drawBitmap(bitmap, rect, rect, paint);
         }
-
-
-
-
     }
 
-    public void addDelMarket(boolean isShow){
-
+    public void addDelMarket(boolean isShow) {
         delIsShow = isShow;
-
         invalidate();
-
     }
 }

@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import com.scwang.smartrefresh.header.PhoenixHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.List;
@@ -89,7 +90,9 @@ public class PunchMyFragment extends BaseFragment implements PunchMyView {
         recyclerView.addItemDecoration(new MyDecoration(getContext(), LinearLayout.VERTICAL));
         refreshLayout = (SmartRefreshLayout) view.findViewById(R.id.refreshLayout);
         //设置 Header 为 Material样式
-        refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));
+//        refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));//不支持安卓9.0
+        //设置 Header 为 贝塞尔雷达 样式
+        refreshLayout.setRefreshHeader(new BezierRadarHeader(getContext()).setEnableHorizontalDrag(true));
         myNoContent = (LinearLayout) view.findViewById(R.id.myNoContent);
         presenter = new PunchMyPresenter(this);
     }

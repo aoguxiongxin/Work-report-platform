@@ -57,13 +57,13 @@ public interface NotificationApi {
     Observable<ChangeStatusBean> changeMessageStatus(@Field("userId") String userId, @Field("messageId") int messageId);
 
 
-    //就业利好---------------------
+    //数据统计---------------------
 
     //查询学院
     @GET("mobileGoodNews/getCollegeList")
     ResponseBody getCollegeList();
 
-    //查询就业学生信息
+    //查询学生信息
     @FormUrlEncoded
     @POST("mobileGoodNews/queryGoodNews")
     Observable<StudentBean> queryGoodNews(@Field("userId") String userId);

@@ -42,9 +42,9 @@ import atest.test.com.app.constant.BaseMessage;
 import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.EventBusBean.LocationBean;
 import atest.test.com.app.model.bean.VersionBean;
-import atest.test.com.app.model.utils.DownloadUtils;
-import atest.test.com.app.model.utils.LocationUtil;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.DownloadUtils;
+import atest.test.com.app.utils.LocationUtil;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.mine.CheckVersionPresenter;
 import atest.test.com.app.view.adapter.MyViewPagerAdapter;
 import atest.test.com.app.view.circle.NoScrollViewPager;
@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public QBadgeView qBadgeView;
     private Button button;
 
-    private CheckVersionPresenter checkVersionPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,13 +111,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestPermission(permissionGroup, 116);
         //点击事件
         onClickListener();
-
-
     }
 
     private void onClickListener() {
-
-        //设置radioGroup监听,选中的radioButton颜色变红
+        //设置radioGroup监听,选中的radioButton变色
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
@@ -126,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     RadioButton button = (RadioButton) radioGroup.getChildAt(i);
                     if (button.isChecked()) {
                         button.setTextColor(getResources().getColor(R.color.white));
+                        viewpager.setCurrentItem(i);//点击相应按钮,把viewPager滑动到相对应的页面
                     } else {
                         button.setTextColor(getResources().getColor(R.color.titleColor2));
                     }
@@ -159,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         //判断是不是跳转网络设置的请求码
         if (requestCode == SET_NETWORK_REQUEST || requestCode == GO_TO_SETTING_REQUEST_CODE) {
-            //判断当前是否有网
+            //广播监听,判断当前是否有网
             if (networkSP.getBoolean(NETWORK_STATE_BOOLEAN, false)) {
                 //重启页面,完成定位
                 recreate();
@@ -171,8 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initView() {
         //检测版本是否为最新
-        checkVersionPresenter = new CheckVersionPresenter(this);
-        checkVersionPresenter.checkVersion(getVersionCode());
+        new CheckVersionPresenter(this).checkVersion(getVersionCode());
         //初始化控件
         btn_punch_clock = (RadioButton) findViewById(R.id.btn_punch_clock);
         btn_report = (RadioButton) findViewById(R.id.btn_report);
@@ -183,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         viewpager = (NoScrollViewPager) findViewById(R.id.ReportViewPager);
 
-
         //未读消息小红点
         qBadgeView = new QBadgeView(this);
         //绑定view
@@ -192,12 +187,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .subscribe(new Observer<Integer>() {
                     @Override
                     public void onCompleted() {
-
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
                     }
 
                     //设置小红点number
@@ -222,7 +215,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //没有网络的时候显示的提示栏
 
         list = new ArrayList<>();
-        initData();
+        list.add(new PunchFragment());
+        list.add(new ReportFragment());
+        list.add(new NotificationFragment());
+        list.add(new MineFragment());
         //保存网络状态的SharedPreferences
         networkSP = getSharedPreferences(NETWORK_STATE_NAME, MODE_PRIVATE);
 
@@ -231,40 +227,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_punch_clock.setOnClickListener(this);
         btn_mine.setOnClickListener(this);
         networkLayout.setOnClickListener(this);
-
-    }
-
-    private void initData() {
-        list.add(new PunchFragment());
-        list.add(new ReportFragment());
-        list.add(new NotificationFragment());
-        list.add(new MineFragment());
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_punch_clock:
+          /*  case R.id.btn_punch_clock:
                 viewpager.setCurrentItem(0);
                 break;
             case R.id.btn_report:
                 viewpager.setCurrentItem(1);
-
                 break;
             case R.id.btn_notification:
                 viewpager.setCurrentItem(2);
                 break;
             case R.id.btn_mine:
                 viewpager.setCurrentItem(3);
-
-                break;
+                break;*/
             case R.id.networkLayout://显示没有网络的横幅,点击跳转设置页面
                 Intent intent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
                 startActivityForResult(intent, SET_NETWORK_REQUEST);
                 break;
         }
-
-
     }
 
     @Override
@@ -275,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //更新版本的回调
     @Override
     public void Upgrade(final VersionBean bean) {
-
         //自定义一个对话框
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.NoBackGroundDialog);
         View view = View.inflate(this, R.layout.version_upgrade, null);
@@ -288,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 //下载新的app
-                new DownloadUtils(MainActivity.this).download(bean.getObject(), "八维工作汇报平台");
+                new DownloadUtils(MainActivity.this).download(bean.getObject(), "工作汇报平台");
                 alertDialog.dismiss();
             }
         });
@@ -298,10 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 alertDialog.dismiss();
             }
         });
-
-
     }
-
 
     //用来检测网络的广播
     class NetworkBroadcastReceiver extends BroadcastReceiver {
@@ -339,7 +319,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-
         if (viewpager.getCurrentItem() == 0) {
             new AlertDialog.Builder(this)
                     .setIcon(R.drawable.cry)
@@ -371,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (checkPermissions(permissions)) {
             permissionSuccess(REQUEST_CODE_PERMISSION);
         } else {
-            List<String> needPermissions = getDeniedPermissions(permissions);
+            List<String> needPermissions = getNeedRequestPermissions(permissions);
             ActivityCompat.requestPermissions(this, needPermissions.toArray(new String[needPermissions.size()]), REQUEST_CODE_PERMISSION);
         }
     }
@@ -402,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param permissions
      * @return
      */
-    private List<String> getDeniedPermissions(String[] permissions) {
+    private List<String> getNeedRequestPermissions(String[] permissions) {
         List<String> needRequestPermissionList = new ArrayList<>();
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(this, permission) !=
@@ -466,6 +445,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String nativePhoneNumber;
         //获取手机号
         TelephonyManager telephonyManager = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+        //检查是否授权
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         nativePhoneNumber = telephonyManager.getLine1Number();
         if (!TextUtils.isEmpty(nativePhoneNumber) && nativePhoneNumber.contains("+86")) {
             nativePhoneNumber = nativePhoneNumber.substring(3, nativePhoneNumber.length());
@@ -523,7 +506,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!TextUtils.isEmpty(value)) {
             switch (value) {
                 case "notify":
-
                     //跳转到通知
                     viewpager.setCurrentItem(2);
                     btn_notification.setChecked(true);
@@ -535,8 +517,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // TODO: 2017/11/15 进入主界面  检查版本号
-
-
     //拿到当前版本号
     private int getVersionCode() {
         try {
@@ -547,5 +527,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return 0;
     }
-
 }

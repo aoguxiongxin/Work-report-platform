@@ -3,7 +3,7 @@ package atest.test.com.app.model.bean;
 
 import com.google.gson.Gson;
 
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.RxBus;
 import rx.Observable;
 import rx.functions.Func1;
 

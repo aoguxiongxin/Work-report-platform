@@ -3,7 +3,7 @@ package atest.test.com.app.model.reportModel;
 import atest.test.com.app.constant.MyApi;
 import atest.test.com.app.model.bean.ReportBean.ReportHackfanMyBean;
 import atest.test.com.app.model.bean.ReportBean.ReportHackfanMyLowarBean;
-import atest.test.com.app.model.utils.RetrofitManager;
+import atest.test.com.app.utils.RetrofitManager;
 import io.reactivex.Observable;
 
 /**

@@ -2,7 +2,7 @@ package atest.test.com.app.model.mineModel;
 
 import atest.test.com.app.constant.CheckVersionApi;
 import atest.test.com.app.model.bean.VersionBean;
-import atest.test.com.app.model.utils.RetrofitManager;
+import atest.test.com.app.utils.RetrofitManager;
 import io.reactivex.Observable;
 
 /**

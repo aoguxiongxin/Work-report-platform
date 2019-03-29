@@ -23,7 +23,6 @@ public class CheckVersionPresenter extends IPresenter<CheckVersionView> {
 
     @Override
     public void init() {
-
         checkVersionModel = new CheckVersionModel();
     }
 
@@ -39,7 +38,6 @@ public class CheckVersionPresenter extends IPresenter<CheckVersionView> {
 
                     @Override
                     public void onNext(VersionBean versionBean) {
-
                         //
                         if (view != null) {
                             if (versionBean.getCode() == 200) {

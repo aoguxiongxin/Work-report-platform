@@ -29,11 +29,12 @@ import atest.test.com.app.R;
 import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.notificationBean.LPLBean;
 import atest.test.com.app.model.bean.notificationBean.SendResultBean;
-import atest.test.com.app.model.utils.ProgressBarUtils;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.ProgressBarUtils;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.IPresenter;
 import atest.test.com.app.presenter.notification.GetLPLPresenter;
 import atest.test.com.app.presenter.notification.SendMessagePresenter;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.adapter.MyRecyclerViewAdapter;
 import atest.test.com.app.view.fragment.BaseFragment;
 import atest.test.com.app.view.myInterface.notification.GetLPLView;
@@ -132,9 +133,7 @@ public class SendNotifyFragment extends BaseFragment implements View.OnClickList
         view.findViewById(R.id.linearLayout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(getActivity(), v);
             }
         });
 
@@ -201,12 +200,8 @@ public class SendNotifyFragment extends BaseFragment implements View.OnClickList
                             notifyDialog.dismiss();
                         }
                     });
-
-
                     //关闭小键盘
-                    InputMethodManager imm = (InputMethodManager)
-                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    SettingUtils.closeInputMethod(getActivity(), v);
                 } else {
                     tv_warning.setVisibility(View.VISIBLE);
                 }
@@ -232,9 +227,7 @@ public class SendNotifyFragment extends BaseFragment implements View.OnClickList
                             .setNegativeButton("取消", null)
                             .create().show();
                     //关闭小键盘
-                    InputMethodManager imm = (InputMethodManager)
-                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    SettingUtils.closeInputMethod(getActivity(), v);
                 } else {
                     tv_warning.setVisibility(View.VISIBLE);
                 }
@@ -266,9 +259,7 @@ public class SendNotifyFragment extends BaseFragment implements View.OnClickList
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(getActivity(), v);
             }
         });
         notifyDialog = builder.setView(view).create();

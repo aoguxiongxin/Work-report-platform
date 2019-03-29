@@ -2,7 +2,7 @@ package atest.test.com.app.model.punchModel;
 
 import atest.test.com.app.constant.MyApi;
 import atest.test.com.app.model.bean.punchBean.PuncheLowerBean;
-import atest.test.com.app.model.utils.RetrofitManager;
+import atest.test.com.app.utils.RetrofitManager;
 import io.reactivex.Observable;
 
 /**

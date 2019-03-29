@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import com.scwang.smartrefresh.header.PhoenixHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.List;
@@ -118,7 +119,9 @@ public class ReportMyFragment extends BaseFragment implements View.OnClickListen
         myRefreshLayout = (SmartRefreshLayout) view.findViewById(R.id.myRefreshLayout);
 
         //设置 Header 为 Material样式
-        myRefreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));
+//        myRefreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));//不支持安卓9.0
+        //设置 Header 为 贝塞尔雷达 样式
+        myRefreshLayout.setRefreshHeader(new BezierRadarHeader(getContext()).setEnableHorizontalDrag(true));
 
         myMinuteReport.setOnClickListener(this);
 

@@ -10,17 +10,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -30,8 +26,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import atest.test.com.app.R;
@@ -39,25 +33,23 @@ import atest.test.com.app.constant.BaseMessage;
 import atest.test.com.app.constant.ProgressBarHorizontal;
 import atest.test.com.app.constant.UserInfo;
 import atest.test.com.app.constant.UserInfoManager;
-import atest.test.com.app.model.utils.UploadingImageViewUtils;
 import atest.test.com.app.presenter.report.ReportJobPresenter;
 import atest.test.com.app.presenter.report.UploadingImgPresenter;
+import atest.test.com.app.utils.CameraPhotoUtils;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.circle.CanAddViewImageView;
 import atest.test.com.app.view.myInterface.report.ReportJobView;
 import atest.test.com.app.view.myInterface.report.UploadingImgView;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
 
 /**
  * 作者 : 赵虔
  * 时间 : 2017/11/2
- * 作用 :
+ * 作用 :日汇报中的五种类型页面,例会汇报,活动汇报
  */
 
 public class ReportActivity extends Activity implements View.OnClickListener, ReportJobView, UploadingImgView {
-    private final static String[] types = {"讲座", "招聘", "出差", "家访", "帮扶", "例会","活动"};
+    private final static String[] types = {"讲座", "招聘", "出差", "家访", "帮扶", "例会", "活动"};
 
     private final String[] type1 = {"参加人数:", "地点:", "效果:", "证明人及联系电话:", "讲座人电话:", "备注:"};//6
     private final String[] type2 = {"参加人数:", "地点:", "效果:", "证明人及联系电话:", "招聘主管人电话:", "备注:"};//6
@@ -92,20 +84,14 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
     private UploadingImgPresenter uploadingImgPresenter;
 
     public String mPublicPhotoPath;
-    public static final int REQ_GALLERY = 333;
-    public static final int REQUEST_CODE_PICK_IMAGE = 222;
+
     private PopupWindow mPopupWindow;
     private View popView;
-    private CanAddViewImageView mView;
     private Button b1;
     private Button b2;
     private Button b3;
     private boolean canDelete;
     protected StringBuffer ImageName = new StringBuffer();
-    private Uri uri;
-    public String path;
-    int mTargetW;
-    int mTargetH;
     private LinearLayout uploadingImg;
 
     @Override
@@ -151,7 +137,7 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
         uploadingImg.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                showDialog(v);
+                showDialog();
                 return true;
             }
         });
@@ -173,7 +159,6 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
         //标题名字
         title = (TextView) findViewById(R.id.title);
         //输入框
-
         name0 = (TextView) findViewById(R.id.name0);
         name1 = (TextView) findViewById(R.id.name1);
         name2 = (TextView) findViewById(R.id.name2);
@@ -216,92 +201,15 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
                 finish();
                 break;
             case R.id.reprotLayout:
-                InputMethodManager imm = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(ReportActivity.this, v);
                 break;
             case R.id.textLayout:
-                InputMethodManager imm2 = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm2.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(ReportActivity.this, v);
                 break;
             case R.id.uploadingImg://弹出对话框
                 showPopupWindow(v);
                 break;
         }
-    }
-
-    public void showPopupWindow(View view) {
-        setBackgroundAlpha(0.5f);  // 弹出时设置半透明
-
-        //底部弹出
-        mPopupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
-
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPopupWindow.dismiss();
-                getImageFromAlbum();
-            }
-        });
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPopupWindow.dismiss();
-                startTake();
-            }
-        });
-    }
-
-    @SuppressLint("NewApi")
-    public void addGridImage(String path, int mTargetW, int mTargetH) {
-//        mView = new ImageView(this);
-
-        canDelete = false;
-        mView = new CanAddViewImageView(this);
-        mView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
-
-
-        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = getResources().getDisplayMetrics().widthPixels / 3 - 30 - 30;
-        params.height = getResources().getDimensionPixelSize(R.dimen.qqq);
-
-
-        params.setGravity(Gravity.RIGHT);
-        params.setMargins(30, 30, 30, 30);
-
-
-        mView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        mView.setLayoutParams(params);
-
-
-        Bitmap mBitmap = UploadingImageViewUtils.getSmallBitmap(path, params.width,
-                params.height);
-        mView.setImageBitmap(mBitmap);
-        mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v1) {
-                if (canDelete) {
-                    showDialog(v1);
-                }
-
-            }
-        });
-    }
-
-    private void showDialog(final View v) {
-        AlertDialog.Builder dialog =
-                new AlertDialog.Builder(this);
-
-        dialog.setMessage("确定删除此图片？");
-        dialog.setNegativeButton("取消", null);
-        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                uploading.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.tuankaung_tupian));
-            }
-        });
-        dialog.create().show();
     }
 
     public void initPop() {
@@ -328,7 +236,7 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
         mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                setBackgroundAlpha(1.0f); //为界面 设置正常透明度
+                SettingUtils.setBackgroundAlpha(ReportActivity.this, 1.0f); //为界面 设置正常透明度
             }
         });
         //取消
@@ -341,25 +249,79 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
 
     }
 
-    /**
-     * 设置屏幕的透明度的方法
-     */
-    public void setBackgroundAlpha(float bgAlpha) {
-        WindowManager.LayoutParams lp = getWindow()
-                .getAttributes();
-        lp.alpha = bgAlpha;
-        getWindow().setAttributes(lp);
+    public void showPopupWindow(View view) {
+        SettingUtils.setBackgroundAlpha(ReportActivity.this, 0.5f);  // 弹出时设置半透明
+
+        //底部弹出
+        mPopupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupWindow.dismiss();
+                CameraPhotoUtils.openPhotoAlbum(ReportActivity.this);
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupWindow.dismiss();
+//                startTake();
+                mPublicPhotoPath = CameraPhotoUtils.openCamera(ReportActivity.this);
+            }
+        });
     }
 
-    /**
-     * 获取相册中的图片
-     */
-    public void getImageFromAlbum() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");//相片类型
-        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
+    @SuppressLint("NewApi")
+    public void addGridImage(String path) {
+//        mView = new ImageView(this);
+
+        canDelete = false;
+        CanAddViewImageView mView = new CanAddViewImageView(this);
+        mView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
+
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels / 3 - 30 - 30;
+        params.height = getResources().getDimensionPixelSize(R.dimen.qqq);
+
+        params.setGravity(Gravity.RIGHT);
+        params.setMargins(30, 30, 30, 30);
+
+        mView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mView.setLayoutParams(params);
+
+        Bitmap mBitmap = CameraPhotoUtils.getSmallBitmap(path, params.width, params.height);
+        mView.setImageBitmap(mBitmap);
+        mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v1) {
+                if (canDelete) {
+                    showDialog();
+                }
+
+            }
+        });
     }
 
+    private void showDialog() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setMessage("确定删除此图片？");
+        dialog.setNegativeButton("取消", null);
+        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                uploading.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.tuankaung_tupian));
+            }
+        });
+        dialog.create().show();
+    }
+
+   /* */
+
+    /**
+     * 打开照相机
+     *//*
     private void startTake() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         //判断是否有相机应用
@@ -367,78 +329,84 @@ public class ReportActivity extends Activity implements View.OnClickListener, Re
             //创建临时图片文件
             File photoFile = null;
             try {
-                photoFile = UploadingImageViewUtils.createPublicImageFile();
+                photoFile = CameraPhotoUtils.createPhotoFile();
                 mPublicPhotoPath = photoFile.getAbsolutePath();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             //设置Action为拍照
             if (photoFile != null) {
-                takePictureIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                //这里加入flag
+                *//*takePictureIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                //这里加入flag,解决给当前应用授权问题
                 takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                Uri photoURI = FileProvider.getUriForFile(this, "applicationId.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                Uri photoURI;
+                //安卓7.0之前可以使用file:// 但是 7.0之后必须使用 content:// 否则报异常
+                if (Build.VERSION.SDK_INT >= 24) {
+                    //第二个参数需要和AndroidManifest文件中的android.support.v4.content.FileProvider的authorities值相同
+                    photoURI = FileProvider.getUriForFile(this, getPackageName() + ".android7.fileProvider", photoFile);
+                } else {
+                    photoURI = Uri.fromFile(photoFile);
+                }
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);*//*
+                takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProviderUtils.getUriForFile(this, photoFile));
                 startActivityForResult(takePictureIntent, REQ_GALLERY);
             }
         }
-    }
-
+    }*/
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 //        mTargetW = mImageView.getWidth();
 //        mTargetH = mImageView.getHeight();
+     /*   if (resultCode != Activity.RESULT_OK || data == null) return;
+        String photoPath = null;
         switch (requestCode) {
-            //拍照
-            case REQ_GALLERY:
-                if (resultCode != Activity.RESULT_OK) return;
-                uri = Uri.parse(mPublicPhotoPath);
-                path = uri.getPath();
-                UploadingImageViewUtils.galleryAddPic(mPublicPhotoPath, this);
-                if (path != null)
-                    uploading.setImageBitmap(BitmapFactory.decodeFile(path));
-
-                File file = new File(path);
+            case REQ_GALLERY: //拍照返回
+                photoPath = Uri.parse(mPublicPhotoPath).getPath();
+                //将照片添加到手机相册中
+                CameraPhotoUtils.galleryAddPic(mPublicPhotoPath, this);
+                if (!TextUtils.isEmpty(photoPath)) {
+                    uploading.setImageBitmap(BitmapFactory.decodeFile(photoPath));
+                }
+                File file = new File(photoPath);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 MultipartBody.Part part = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
 
-                UserInfo userInfo = UserInfoManager.getInstance(this).getUserInfo();
+               *//* UserInfo userInfo = UserInfoManager.getInstance(this).getUserInfo();
                 if (!TextUtils.isEmpty(userInfo.getId())) {
                     uploadingImgPresenter.uploadingImg(userInfo.getId(), part);
                     ProgressBarHorizontal.horizontalProgressBar(this);
                 } else {
                     BaseMessage.showDialogAndFinish(this, "图片上传失败\n请在考勤打卡\n实名认证", "知道了");
-                }
+                }*//*
                 break;
-            //获取相册的图片
-            case REQUEST_CODE_PICK_IMAGE:
-                if (data == null) return;
-                uri = data.getData();
-                int sdkVersion = Integer.valueOf(Build.VERSION.SDK);
-                if (sdkVersion >= 19) {
-                    path = this.uri.getPath();
-                    path = UploadingImageViewUtils.getPath_above19(this, this.uri);
+            case REQUEST_CODE_PICK_IMAGE: //获取从相册选择的照片
+                Uri uriData = data.getData();
+                if (Build.VERSION.SDK_INT >= 19) {
+                    photoPath = uriData.getPath();
+                    photoPath = CameraPhotoUtils.getPath_above19(this, uriData);
                 } else {
-                    path = UploadingImageViewUtils.getFilePath_below19(this, this.uri);
+                    photoPath = CameraPhotoUtils.getFilePath_below19(this, uriData);
                 }
-                if (path != null)
-                    uploading.setImageBitmap(BitmapFactory.decodeFile(path));
-
-                File file2 = new File(path);
+                if (!TextUtils.isEmpty(photoPath)) {
+                    uploading.setImageBitmap(BitmapFactory.decodeFile(photoPath));
+                }
+                File file2 = new File(photoPath);
                 RequestBody requestBody2 = RequestBody.create(MediaType.parse("multipart/form-data"), file2);
                 MultipartBody.Part part2 = MultipartBody.Part.createFormData("image", file2.getName(), requestBody2);
 
-                UserInfo userInfo2 = UserInfoManager.getInstance(this).getUserInfo();
+               *//* UserInfo userInfo2 = UserInfoManager.getInstance(this).getUserInfo();
                 if (!TextUtils.isEmpty(userInfo2.getId())) {
                     uploadingImgPresenter.uploadingImg(userInfo2.getId(), part2);
                     ProgressBarHorizontal.horizontalProgressBar(this);
                 } else {
                     BaseMessage.showDialogAndFinish(this, "图片上传失败\n请在考勤打卡\n实名认证", "知道了");
-                }
+                }*//*
                 break;
-        }
-        addGridImage(path, mTargetW, mTargetH);
+        }*/
+        String photoPath = CameraPhotoUtils.onActivityResult(this, mPublicPhotoPath, uploading, requestCode, resultCode, data, uploadingImgPresenter);
+        addGridImage(photoPath);
     }
 
     //提交

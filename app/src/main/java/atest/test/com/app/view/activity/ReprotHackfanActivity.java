@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.borax12.materialdaterangepicker.date.DatePickerDialog;
 
+
 import atest.test.com.app.R;
 import atest.test.com.app.constant.BaseMessage;
 import atest.test.com.app.view.adapter.ReportLeftTypeAdapter;
@@ -31,19 +32,17 @@ import static atest.test.com.app.constant.BaseMessage.REPORT_MY;
  * 作用 :查询
  */
 
-public class ReprotHackfanActivity extends AppCompatActivity implements
-        DatePickerDialog.OnDateSetListener, View.OnClickListener {
+public class ReprotHackfanActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, View.OnClickListener {
 
     private EditText startTime, endTime;
     public static int TYPE_POSITION = 1;
 
-    private static final String[] TYPES = {"咨询", "讲座", "招聘", "出差", "家访", "帮扶", "例会" ,"其它","活动"};
+    private static final String[] TYPES = {"咨询", "讲座", "招聘", "出差", "家访", "帮扶", "例会", "其它", "活动"};
 
     private ListView listView;
 
     private ReportLeftTypeAdapter adapter;
     private boolean canSearch = false;
-
     private Calendar now = Calendar.getInstance();
     private DatePickerDialog dpd = DatePickerDialog.newInstance(
             ReprotHackfanActivity.this,

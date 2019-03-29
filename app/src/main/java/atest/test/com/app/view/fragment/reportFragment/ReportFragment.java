@@ -46,7 +46,9 @@ public class ReportFragment extends Fragment {
     }
 
     private void initView() {
-        tabLayout = (TabLayout) view.findViewById(R.id.ReportTabLayout);
+        //获取头部的include
+        View inclutView = view.findViewById(R.id.ReportTitleLayout);
+        tabLayout = (TabLayout) inclutView.findViewById(R.id.TitleTabLayout);
         viewpager = (ViewPager) view.findViewById(R.id.ReportViewPager);
         //保存Fragment的集合
         list = new ArrayList<>();

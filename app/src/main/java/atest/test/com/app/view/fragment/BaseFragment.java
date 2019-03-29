@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import atest.test.com.app.constant.UserInfo;
 import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.RefreshBean;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.IPresenter;
 import rx.Observable;
 import rx.Observer;

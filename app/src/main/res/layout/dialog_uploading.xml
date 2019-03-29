@@ -6,22 +6,22 @@
     android:background="@drawable/backgroud_style01"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:paddingTop="20dp"
-        android:text="图片正在上传中..."
-        android:textColor="@color/textColor2"
-        android:textSize="22sp" />
 
     <ProgressBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:paddingTop="10dp"
+        android:text="正在验证密钥..."
+        android:textColor="@color/textColor2"
+        android:textSize="22sp" />
 
 </LinearLayout>

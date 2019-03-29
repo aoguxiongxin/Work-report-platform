@@ -122,7 +122,7 @@
                 android:textColor="#B2B1B1" />
         </RadioGroup>
 
-
+        <!--当有通知到来的时候,让通知的按钮显示红点-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="65dp"

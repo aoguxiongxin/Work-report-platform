@@ -11,14 +11,13 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.scwang.smartrefresh.header.PhoenixHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.punchBean.PuncheLowerBean;
 import atest.test.com.app.presenter.IPresenter;
 import atest.test.com.app.presenter.punch.PunchSubordinatePresenter;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.adapter.PunchSubordinateAdapter;
 import atest.test.com.app.view.fragment.BaseFragment;
 import atest.test.com.app.view.myInterface.punch.punchSubordianateView;
@@ -91,7 +91,7 @@ public class PunchSubordinateFragment extends BaseFragment implements punchSubor
                 refreshLayout.finishRefresh();
             }
         });
-
+        //名字输入框变化监听
         seekText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -157,8 +157,9 @@ public class PunchSubordinateFragment extends BaseFragment implements punchSubor
         recyclerView = (RecyclerView) view.findViewById(R.id.subordinateRV);
         refreshLayout = (SmartRefreshLayout) view.findViewById(R.id.refreshLayout);
         //设置 Header 为 Material样式
-        refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));
-
+//        refreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));//不支持安卓9.0
+        //设置 Header 为 贝塞尔雷达 样式
+        refreshLayout.setRefreshHeader(new BezierRadarHeader(getContext()).setEnableHorizontalDrag(true));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new MyDecoration(getContext(), LinearLayout.VERTICAL));
         presenter = new PunchSubordinatePresenter(this);
@@ -195,9 +196,7 @@ public class PunchSubordinateFragment extends BaseFragment implements punchSubor
             @Override
             public void myOnClick(View v, int position) {
                 //关闭输入法
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(getActivity(), v);
                 //清空StringBuffer
                 sb.delete(0, sb.length());
 

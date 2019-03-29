@@ -13,7 +13,7 @@ import java.util.List;
 
 import atest.test.com.app.R;
 import atest.test.com.app.model.bean.notificationBean.MineSendMessageBean;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.view.adapter.SubnateAdapter;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;

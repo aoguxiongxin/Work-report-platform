@@ -17,6 +17,8 @@ import android.view.inputmethod.InputMethodManager;
 import java.util.ArrayList;
 
 import atest.test.com.app.R;
+import atest.test.com.app.utils.SettingUtils;
+import atest.test.com.app.view.activity.ConsultActivity;
 
 
 /**
@@ -54,16 +56,16 @@ public class PunchFragment extends Fragment {
             viewPager.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                 @Override
                 public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    InputMethodManager imm = (InputMethodManager)
-                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    SettingUtils.closeInputMethod(getActivity(), v);
                 }
             });
         }
     }
 
     private void initView() {
-        punchTablayout = (TabLayout) view.findViewById(R.id.punchTablayout);
+        //获取头部的include
+        View inclutView = view.findViewById(R.id.PunchTitleLayout);
+        punchTablayout = (TabLayout) inclutView.findViewById(R.id.TitleTabLayout);
         viewPager = (ViewPager) view.findViewById(R.id.punchViewPager);
         list = new ArrayList<>();
         list.add(new PunchingFragment());
@@ -89,6 +91,7 @@ public class PunchFragment extends Fragment {
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
+            //不让系统自动销毁item,方式滑动回来以后页面显示空白
 //            super.destroyItem(container, position, object);
         }
 

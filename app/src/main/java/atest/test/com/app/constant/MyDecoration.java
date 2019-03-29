@@ -12,7 +12,7 @@ import android.view.View;
 /**
  * 作者: 赵虔
  * 时间: 2017/8/31
- * 类作用:
+ * 类作用:RecyclerView 分割线
  */
 
 public class MyDecoration extends RecyclerView.ItemDecoration {
@@ -61,8 +61,7 @@ public class MyDecoration extends RecyclerView.ItemDecoration {
             final View child = parent.getChildAt(i);
 
             //获得child的布局信息
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
+            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
             final int top = child.getBottom() + params.bottomMargin;
             final int bottom = top + mDivider.getIntrinsicHeight();
             mDivider.setBounds(left + params.leftMargin, top, right - params.leftMargin, bottom);
@@ -79,8 +78,7 @@ public class MyDecoration extends RecyclerView.ItemDecoration {
             final View child = parent.getChildAt(i);
 
             //获得child的布局信息
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
+            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
             final int left = child.getRight() + params.rightMargin;
             final int right = left + mDivider.getIntrinsicWidth();
             mDivider.setBounds(left, top, right, bottom);
@@ -90,8 +88,7 @@ public class MyDecoration extends RecyclerView.ItemDecoration {
 
     //由于Divider也有长宽高，每一个Item需要向下或者向右偏移
     @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State
-            state) {
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         if (mOrientation == HORIZONTAL_LIST) {
             //画横线，就是往下偏移一个分割线的高度
             outRect.set(0, 0, 0, mDivider.getIntrinsicHeight());

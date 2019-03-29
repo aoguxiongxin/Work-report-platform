@@ -31,11 +31,12 @@ import atest.test.com.app.R;
 import atest.test.com.app.constant.UserInfoManager;
 import atest.test.com.app.model.bean.notificationBean.NotificationBean;
 import atest.test.com.app.model.bean.notificationBean.ReceiveMessageBean;
-import atest.test.com.app.model.utils.ProgressBarUtils;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.ProgressBarUtils;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.IPresenter;
 import atest.test.com.app.presenter.notification.ReceiveMessagePresenter;
 import atest.test.com.app.presenter.notification.ReplyPresenter;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.activity.MainActivity;
 import atest.test.com.app.view.adapter.NotificationAdapter;
 import atest.test.com.app.view.fragment.BaseFragment;
@@ -224,33 +225,23 @@ public class ReceiveNotifyFragment extends BaseFragment implements ReceiveMessag
                     //请求回复的接口
                     replyPresenter.reply(userInfo.getId(), mid + "", text);
 
-
                     //关闭小键盘
-                    InputMethodManager imm = (InputMethodManager)
-                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    SettingUtils.closeInputMethod(getActivity(), v);
 
                     dialog.dismiss();
                     notificationDialog.dismiss();
-
                 }
-
-
             }
         });
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //关闭小键盘
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(getActivity(), v);
                 dialog.dismiss();
                 notificationDialog.dismiss();
             }
         });
-
-
     }
 
     private void showNotification(String content) {

@@ -27,7 +27,8 @@ public class ProgressBarHorizontal {
     }
 
     public static void dismessProgressBar() {
-        alertDialog.dismiss();
+        if (null != alertDialog && alertDialog.isShowing())
+            alertDialog.dismiss();
     }
 
     public static boolean progressIsShow() {

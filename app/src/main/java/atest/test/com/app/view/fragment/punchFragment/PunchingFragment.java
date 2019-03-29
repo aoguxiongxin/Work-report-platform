@@ -17,7 +17,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -36,12 +35,13 @@ import atest.test.com.app.model.bean.EventBusBean.LocationBean;
 import atest.test.com.app.model.bean.EventBusBean.UserMessageBean;
 import atest.test.com.app.model.bean.RefreshBean;
 import atest.test.com.app.model.bean.punchBean.LoginBean;
-import atest.test.com.app.model.utils.GpsUtil;
-import atest.test.com.app.model.utils.LocationUtil;
-import atest.test.com.app.model.utils.ProgressBarUtils;
-import atest.test.com.app.model.utils.RxBus;
+import atest.test.com.app.utils.GpsUtil;
+import atest.test.com.app.utils.LocationUtil;
+import atest.test.com.app.utils.ProgressBarUtils;
+import atest.test.com.app.utils.RxBus;
 import atest.test.com.app.presenter.punch.LoginPresenter;
 import atest.test.com.app.presenter.punch.PunchingPresenter;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.IView;
 import atest.test.com.app.view.myInterface.punch.LoginRequestView;
 import atest.test.com.app.view.myInterface.punch.PunchingView;
@@ -106,7 +106,6 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
         } else {
             canLocation = false;
         }
-
         //检查网络并获取定位的位置
         checkNewworkAndLocation();
     }
@@ -171,38 +170,37 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onClick(View v) {
+        //获取当前系统时间
         long clickTime = System.currentTimeMillis();
-
         switch (v.getId()) {
             case R.id.punchLeft://上下班打卡
-                loadingDialog.show();
                 //判断GPS功能打开没有,如果没打开弹出提示
                 if (!GpsUtil.isOPen(MyApplication.getContext())) {
                     Toast.makeText(getActivity(), "请开启您的GPS定位功能,然后重启软件!", Toast.LENGTH_LONG).show();
                     return;
                 }
-
+                //显示打卡中的dailog
+                showLoadingDialog();
                 if ((clickTime - lastTime) >= 5000) {
                     lastTime = clickTime;
                     punch(1);
                 } else {
-                    loadingDialog.dismiss();
+                    dismissLoadingDialog();
                     Toast.makeText(getActivity(), "打卡频率过快,请稍后再试...", Toast.LENGTH_SHORT).show();
                 }
-
                 break;
             case R.id.punchRight://出差打卡
-                loadingDialog.show();
                 if (!GpsUtil.isOPen(MyApplication.getContext())) {
                     Toast.makeText(getActivity(), "请开启您的GPS定位功能,然后重启软件!", Toast.LENGTH_LONG).show();
                     return;
                 }
-
+                //显示打卡中的dailog
+                showLoadingDialog();
                 if ((clickTime - lastTime) >= 5000) {
                     lastTime = clickTime;
                     punch(2);
                 } else {
-                    loadingDialog.dismiss();
+                    dismissLoadingDialog();
                     Toast.makeText(getActivity(), "打卡频率过快,请稍后再试...", Toast.LENGTH_SHORT).show();
                 }
 
@@ -211,9 +209,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                 checkNewworkAndLocation();
                 break;
             case R.id.ralativeLayout:
-                InputMethodManager imm = (InputMethodManager)
-                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(getActivity(), v);
                 break;
         }
     }
@@ -236,9 +232,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                                     @Override
                                     public void onCancel(DialogInterface dialog) {
                                         dialog.dismiss();
-                                        if (loadingDialog.isShowing()) {
-                                            loadingDialog.dismiss();
-                                        }
+                                        dismissLoadingDialog();
                                     }
                                 }).show();
 
@@ -253,9 +247,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                                 //如果姓名输入框不为空,就进行打卡和验证信息
                                 if (!TextUtils.isEmpty(nameEditText.getText().toString().trim())) {
                                     //关闭小键盘
-                                    InputMethodManager imm = (InputMethodManager)
-                                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                                    SettingUtils.closeInputMethod(getActivity(), v);
 
                                     nameDialog.dismiss();
                                     //请求接口验证用户信息并打卡
@@ -278,18 +270,15 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                         name_gouBack.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                InputMethodManager imm = (InputMethodManager)
-                                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
+                                SettingUtils.closeInputMethod(getActivity(), v);
                                 nameDialog.dismiss();
-                                if (loadingDialog.isShowing()) {
-                                    loadingDialog.dismiss();
-                                }
+                                dismissLoadingDialog();
                             }
                         });
 
-                    } else {//用户姓名不为空就直接打卡
+                    } else {
+                        //拿到用户手机号,并且用户不是第一次打卡,本地保存了用户ID的,
+                        // 就直接读取本地UserId,使用定位获取到的位置信息备注内容进行打卡
                         LocationUtil.getLocation(MyApplication.getContext());
                         LocationUtil.setMyLocationListener(new LocationUtil.MyLocationListener() {
                             @Override
@@ -306,7 +295,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                             }
                         });
                     }
-                } else {//没有拿到手机号提示用户
+                } else {//没有拿到手机号就弹出有手机号和用户姓名的弹框让用户手动填写信息打卡
 //                    new AlertDialog.Builder(getContext())
 //                            .setTitle("目前只支持移动和联通用户:")
 //                            .setMessage("未识别到您卡一的手机号码,请把已登记注册的手机卡放到手机卡槽一,然后再重试;如果还不能使用,请联系管理人员确认个人信息,或到营业厅更换手机卡,换卡时请把手机号写入到手机卡中!")
@@ -319,17 +308,13 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                                     @Override
                                     public void onCancel(DialogInterface dialog) {
                                         dialog.dismiss();
-                                        if (loadingDialog.isShowing()) {
-                                            loadingDialog.dismiss();
-                                        }
+                                        dismissLoadingDialog();
                                     }
                                 }).show();
-
                         final EditText nameEditText = (EditText) view.findViewById(R.id.userName);
                         final EditText phoneEditText = (EditText) view.findViewById(R.id.phone);
                         Button name_commit = (Button) view.findViewById(R.id.name_commit);
                         Button name_gouBack = (Button) view.findViewById(R.id.name_gouBack);
-
                         //确定按钮
                         name_commit.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -337,10 +322,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                                 //如果姓名输入框不为空,就进行打卡和验证信息
                                 if (!TextUtils.isEmpty(nameEditText.getText().toString().trim()) && !TextUtils.isEmpty(phoneEditText.getText().toString().trim())) {
                                     //关闭小键盘
-                                    InputMethodManager imm = (InputMethodManager)
-                                            getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
+                                    SettingUtils.closeInputMethod(getActivity(), v);
                                     nameDialog.dismiss();
                                     //请求接口验证用户信息并打卡
                                     LocationUtil.getLocation(MyApplication.getContext());
@@ -363,14 +345,9 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                         name_gouBack.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                InputMethodManager imm = (InputMethodManager)
-                                        getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
+                                SettingUtils.closeInputMethod(getActivity(), v);
                                 nameDialog.dismiss();
-                                if (loadingDialog.isShowing()) {
-                                    loadingDialog.dismiss();
-                                }
+                                dismissLoadingDialog();
                             }
                         });
 
@@ -396,6 +373,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                 Toast.makeText(getActivity(), "请检查您的网络", Toast.LENGTH_LONG).show();
             }
         } else {
+            dismissLoadingDialog();
             new AlertDialog.Builder(getContext())
                     .setTitle("定位权限未打开:")
                     .setMessage("为了正常使用打卡功能,请打开定位权限!")
@@ -407,6 +385,20 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
                     })
                     .setNegativeButton("取消", null)
                     .show();
+        }
+    }
+
+    //关闭loadingDialog
+    private void dismissLoadingDialog() {
+        if (null != loadingDialog && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+
+    //显示loadingDialog
+    private void showLoadingDialog() {
+        if (null != loadingDialog && !loadingDialog.isShowing()) {
+            loadingDialog.show();
         }
     }
 
@@ -446,24 +438,21 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onPunchSucceed() {
-        loadingDialog.dismiss();
+        dismissLoadingDialog();
         remark.setText("");
         BaseMessage.showDialog(getActivity(), "打卡成功", "完成");                                        //调用接口项服务器回传数据
     }
 
     @Override
     public void onPunchFaild() {
-        if (loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
-        }
-
+        dismissLoadingDialog();
         BaseMessage.showDialog(getActivity(), "打卡失败", "知道了");
     }
 
 
     @Override
     public void onLoginSucceed(LoginBean loginBean) {
-        loadingDialog.dismiss();
+        dismissLoadingDialog();
         //第一次验证登录打卡成功以后把备注框设置为空
         remark.setText("");
         //保存姓名
@@ -508,9 +497,7 @@ public class PunchingFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onLoginFaild(String result) {
-        if (loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
-        }
+        dismissLoadingDialog();
         BaseMessage.showDialog(getActivity(), result, "知道了");
     }
 

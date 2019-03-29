@@ -6,29 +6,32 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="#999999">
+    <include
+        android:id="@+id/PunchTitleLayout"
+        layout="@layout/inclute_title_tablayout" />
+    <!-- <RelativeLayout
+         android:layout_width="match_parent"
+         android:layout_height="70dp"
+         android:background="@color/textColor2">
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/punchTablayout"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_alignParentBottom="true"
-            android:background="@color/white"
-            app:tabGravity="fill"
-            app:tabIndicatorHeight="0dp"
-            app:tabMaxWidth="0dp"
-            app:tabMode="fixed"
-            app:tabPaddingBottom="3dp"
-            app:tabSelectedTextColor="@color/white"
-            app:tabTextAppearance="@style/TabLayoutTextStyle"
-            app:tabTextColor="@color/white">
+         <android.support.design.widget.TabLayout
+             android:id="@+id/punchTablayout"
+             android:layout_width="match_parent"
+             android:layout_height="45dp"
+             android:layout_alignParentBottom="true"
+             android:background="@color/white"
+             app:tabGravity="fill"
+             app:tabIndicatorHeight="0dp"
+             app:tabMaxWidth="0dp"
+             app:tabMode="fixed"
+             app:tabPaddingBottom="3dp"
+             app:tabSelectedTextColor="@color/white"
+             app:tabTextAppearance="@style/TabLayoutTextStyle"
+             app:tabTextColor="@color/white">
 
-        </android.support.design.widget.TabLayout>
-    </RelativeLayout>
-
+         </android.support.design.widget.TabLayout>
+     </RelativeLayout>
+ -->
     <android.support.v4.view.ViewPager
         android:id="@+id/punchViewPager"
         android:layout_width="match_parent"

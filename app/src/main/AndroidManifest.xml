@@ -31,10 +31,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <meta-data android:name="design_width" android:value="1080">
-        </meta-data>
-        <meta-data android:name="design_height" android:value="1920">
-        </meta-data>
+        <meta-data
+            android:name="design_width"
+            android:value="1080"></meta-data>
+        <meta-data
+            android:name="design_height"
+            android:value="1920"></meta-data>
+
         <activity
             android:name=".view.activity.WelcomeActivity"
             android:theme="@style/MyAppTheme">
@@ -69,9 +72,11 @@
 
         <activity android:name=".view.activity.OtherActivity" />
 
+        <!--在打开照相机时兼容安卓7.0使用,authorities字段自定义,在打开相机时使用FileProvider.getUriForFile()方法,
+        第二个参数需要和authorities一致才行-->
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="applicationId.fileprovider"
+            android:authorities="${applicationId}.android7.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

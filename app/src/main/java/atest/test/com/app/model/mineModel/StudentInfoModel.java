@@ -2,7 +2,7 @@ package atest.test.com.app.model.mineModel;
 
 import atest.test.com.app.constant.NotificationApi;
 import atest.test.com.app.model.bean.MineBean.StudentBean;
-import atest.test.com.app.model.utils.RetrofitManager;
+import atest.test.com.app.utils.RetrofitManager;
 import io.reactivex.Observable;
 
 /**

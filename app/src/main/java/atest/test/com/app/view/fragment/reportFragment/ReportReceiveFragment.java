@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import com.scwang.smartrefresh.header.PhoenixHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import java.util.List;
@@ -119,7 +120,9 @@ public class ReportReceiveFragment extends BaseFragment implements View.OnClickL
         receiveRefreshLayout = (SmartRefreshLayout) view.findViewById(R.id.receiveRefreshLayout);
 
         //设置 Header 为 Material样式
-        receiveRefreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));
+//        receiveRefreshLayout.setRefreshHeader(new PhoenixHeader(getContext()));//不支持安卓9.0
+        //设置 Header 为 贝塞尔雷达 样式
+        receiveRefreshLayout.setRefreshHeader(new BezierRadarHeader(getContext()).setEnableHorizontalDrag(true));
 
         presenter = new ReportMyLowerPresenter(this);
         myReportNoContent = (LinearLayout) view.findViewById(R.id.reportLowarNoContent);

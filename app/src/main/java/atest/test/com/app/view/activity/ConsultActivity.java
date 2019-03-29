@@ -10,17 +10,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -31,24 +26,22 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
-
 import atest.test.com.app.R;
 import atest.test.com.app.constant.BaseMessage;
 import atest.test.com.app.constant.ProgressBarHorizontal;
 import atest.test.com.app.constant.UserInfo;
 import atest.test.com.app.constant.UserInfoManager;
-import atest.test.com.app.model.utils.UploadingImageViewUtils;
 import atest.test.com.app.presenter.report.ReportJobPresenter;
 import atest.test.com.app.presenter.report.UploadingImgPresenter;
+import atest.test.com.app.utils.CameraPhotoUtils;
+import atest.test.com.app.utils.SettingUtils;
 import atest.test.com.app.view.circle.CanAddViewImageView;
 import atest.test.com.app.view.myInterface.report.ReportJobView;
 import atest.test.com.app.view.myInterface.report.UploadingImgView;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 
+/**
+ * 日汇报中的咨询汇报页面
+ */
 public class ConsultActivity extends Activity implements View.OnClickListener, ReportJobView, UploadingImgView {
 
     private EditText content0;
@@ -60,11 +53,9 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
     private EditText content6;
     private RadioButton radioWoman;
     private RadioButton radioMan;
-    public static ImageView uploading;
+    public ImageView uploading;
 
     public String mPublicPhotoPath;
-    public static final int REQ_GALLERY = 333;
-    public static final int REQUEST_CODE_PICK_IMAGE = 222;
     private PopupWindow mPopupWindow;
     private View popView;
     private CanAddViewImageView mView;
@@ -73,10 +64,6 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
     private Button b3;
     private boolean canDelete;
     protected StringBuffer ImageName = new StringBuffer();
-    private Uri uri;
-    public String path;
-    int mTargetW;
-    int mTargetH;
     private ReportJobPresenter presenter;
     private UploadingImgPresenter uploadingImgPresenter;
     private LinearLayout uploadingImg;
@@ -91,7 +78,7 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
         uploadingImg.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                showDialog(v);
+                showDialog();
                 return true;
             }
         });
@@ -135,79 +122,6 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
         uploadingImgPresenter = new UploadingImgPresenter(this);
     }
 
-    public void showPopupWindow(View view) {
-        setBackgroundAlpha(0.5f);  // 弹出时设置半透明
-
-        //底部弹出
-        mPopupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
-
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPopupWindow.dismiss();
-                getImageFromAlbum();
-            }
-        });
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPopupWindow.dismiss();
-                startTake();
-            }
-        });
-    }
-
-    @SuppressLint("NewApi")
-    public void addGridImage(String path, int mTargetW, int mTargetH) {
-//        mView = new ImageView(this);
-
-        canDelete = false;
-        mView = new CanAddViewImageView(this);
-        mView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
-
-
-        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-        params.width = getResources().getDisplayMetrics().widthPixels / 3 - 30 - 30;
-        params.height = getResources().getDimensionPixelSize(R.dimen.qqq);
-
-
-        params.setGravity(Gravity.RIGHT);
-        params.setMargins(30, 30, 30, 30);
-
-
-        mView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        mView.setLayoutParams(params);
-
-
-        Bitmap mBitmap = UploadingImageViewUtils.getSmallBitmap(path, params.width,
-                params.height);
-        mView.setImageBitmap(mBitmap);
-        mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v1) {
-                if (canDelete) {
-                    showDialog(v1);
-                }
-
-            }
-        });
-    }
-
-    private void showDialog(final View v) {
-        AlertDialog.Builder dialog =
-                new AlertDialog.Builder(this);
-
-        dialog.setMessage("确定删除此图片？");
-        dialog.setNegativeButton("取消", null);
-        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                uploading.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.tuankaung_tupian));
-            }
-        });
-        dialog.create().show();
-    }
-
     public void initPop() {
 
         popView = View.inflate(this, R.layout.pop, null);
@@ -232,7 +146,7 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
         mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                setBackgroundAlpha(1.0f); //为界面 设置正常透明度
+                SettingUtils.setBackgroundAlpha(ConsultActivity.this, 1.0f); //为界面 设置正常透明度
             }
         });
         //取消
@@ -245,65 +159,122 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
 
     }
 
-    /**
-     * 设置屏幕的透明度的方法
-     */
-    public void setBackgroundAlpha(float bgAlpha) {
-        WindowManager.LayoutParams lp = getWindow()
-                .getAttributes();
-        lp.alpha = bgAlpha;
-        getWindow().setAttributes(lp);
+    public void showPopupWindow(View view) {
+        SettingUtils.setBackgroundAlpha(ConsultActivity.this, 0.5f);  // 弹出时设置半透明
+
+        //底部弹出
+        mPopupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupWindow.dismiss();
+                CameraPhotoUtils.openPhotoAlbum(ConsultActivity.this);
+            }
+        });
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPopupWindow.dismiss();
+//                startTake();
+                mPublicPhotoPath = CameraPhotoUtils.openCamera(ConsultActivity.this);
+            }
+        });
     }
 
-    /**
-     * 获取相册中的图片
-     */
-    public void getImageFromAlbum() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");//相片类型
-        startActivityForResult(intent, REQUEST_CODE_PICK_IMAGE);
+    @SuppressLint("NewApi")
+    public void addGridImage(String path) {
+//        mView = new ImageView(this);
+
+        canDelete = false;
+        mView = new CanAddViewImageView(this);
+        mView.setImageDrawable(getDrawable(R.mipmap.ic_launcher));
+
+
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+        params.width = getResources().getDisplayMetrics().widthPixels / 3 - 30 - 30;
+        params.height = getResources().getDimensionPixelSize(R.dimen.qqq);
+
+
+        params.setGravity(Gravity.RIGHT);
+        params.setMargins(30, 30, 30, 30);
+
+
+        mView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        mView.setLayoutParams(params);
+
+
+        Bitmap mBitmap = CameraPhotoUtils.getSmallBitmap(path, params.width,
+                params.height);
+        mView.setImageBitmap(mBitmap);
+        mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v1) {
+                if (canDelete) {
+                    showDialog();
+                }
+
+            }
+        });
     }
 
-    private void startTake() {
+    private void showDialog() {
+        AlertDialog.Builder dialog =
+                new AlertDialog.Builder(this);
+
+        dialog.setMessage("确定删除此图片？");
+        dialog.setNegativeButton("取消", null);
+        dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                uploading.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.tuankaung_tupian));
+            }
+        });
+        dialog.create().show();
+    }
+
+   /* private void startTake() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         //判断是否有相机应用
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             //创建临时图片文件
             File photoFile = null;
             try {
-                photoFile = UploadingImageViewUtils.createPublicImageFile();
+                photoFile = CameraPhotoUtils.createPhotoFile();
                 mPublicPhotoPath = photoFile.getAbsolutePath();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             //设置Action为拍照
             if (photoFile != null) {
-                takePictureIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                *//*takePictureIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
                 //这里加入flag
                 takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Uri photoURI = FileProvider.getUriForFile(ConsultActivity.this, "applicationId.fileprovider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);*//*
+                takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProviderUtils.getUriForFile(this, photoFile));
                 startActivityForResult(takePictureIntent, REQ_GALLERY);
             }
         }
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 //        mTargetW = mImageView.getWidth();
 //        mTargetH = mImageView.getHeight();
+      /*  if (resultCode != Activity.RESULT_OK || data == null) return;
+        String photoPath = null;
         switch (requestCode) {
-            //拍照
-            case REQ_GALLERY:
-                if (resultCode != Activity.RESULT_OK) return;
-                uri = Uri.parse(mPublicPhotoPath);
-                path = uri.getPath();
-                UploadingImageViewUtils.galleryAddPic(mPublicPhotoPath, this);
-                if (path != null)
-                    uploading.setImageBitmap(BitmapFactory.decodeFile(path));
-
-                File file = new File(path);
+            case REQ_GALLERY: //拍照返回
+                photoPath = Uri.parse(mPublicPhotoPath).getPath();
+                //将照片添加到手机相册中
+                CameraPhotoUtils.galleryAddPic(mPublicPhotoPath, this);
+                if (!TextUtils.isEmpty(photoPath)) {
+                    uploading.setImageBitmap(BitmapFactory.decodeFile(photoPath));
+                }
+                File file = new File(photoPath);
                 RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 MultipartBody.Part part = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
 
@@ -317,19 +288,17 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
                 break;
             //获取相册的图片
             case REQUEST_CODE_PICK_IMAGE:
-                if (data == null) return;
-                uri = data.getData();
-                int sdkVersion = Integer.valueOf(Build.VERSION.SDK);
-                if (sdkVersion >= 19) {
-                    path = this.uri.getPath();
-                    path = UploadingImageViewUtils.getPath_above19(this, this.uri);
+                Uri uriData = data.getData();
+                if (Build.VERSION.SDK_INT >= 19) {
+                    photoPath = uriData.getPath();
+                    photoPath = CameraPhotoUtils.getPath_above19(this, uriData);
                 } else {
-                    path = UploadingImageViewUtils.getFilePath_below19(this, this.uri);
+                    photoPath = CameraPhotoUtils.getFilePath_below19(this, uriData);
                 }
-                if (path != null)
-                    uploading.setImageBitmap(BitmapFactory.decodeFile(path));
-
-                File file2 = new File(path);
+                if (!TextUtils.isEmpty(photoPath)) {
+                    uploading.setImageBitmap(BitmapFactory.decodeFile(photoPath));
+                }
+                File file2 = new File(photoPath);
                 RequestBody requestBody2 = RequestBody.create(MediaType.parse("multipart/form-data"), file2);
                 MultipartBody.Part part2 = MultipartBody.Part.createFormData("image", file2.getName(), requestBody2);
 
@@ -341,8 +310,9 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
                     BaseMessage.showDialogAndFinish(this, "图片上传失败\n请在考勤打卡\n实名认证", "知道了");
                 }
                 break;
-        }
-        addGridImage(path, mTargetW, mTargetH);
+        }*/
+        String photoPath = CameraPhotoUtils.onActivityResult(this, mPublicPhotoPath, uploading, requestCode, resultCode, data, uploadingImgPresenter);
+        addGridImage(photoPath);
     }
 
     @Override
@@ -357,14 +327,10 @@ public class ConsultActivity extends Activity implements View.OnClickListener, R
                 finish();
                 break;
             case R.id.contentLayout://关闭输入框
-                InputMethodManager imm = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(ConsultActivity.this, v);
                 break;
             case R.id.consultLayout://关闭输入框
-                InputMethodManager imm1 = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm1.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                SettingUtils.closeInputMethod(ConsultActivity.this, v);
                 break;
             case R.id.uploadingImg://弹出对话框
                 showPopupWindow(v);

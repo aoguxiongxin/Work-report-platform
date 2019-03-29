@@ -3,7 +3,7 @@ package atest.test.com.app.model.notificationModel;
 
 import atest.test.com.app.constant.NotificationApi;
 import atest.test.com.app.model.bean.notificationBean.LPLBean;
-import atest.test.com.app.model.utils.RetrofitManager;
+import atest.test.com.app.utils.RetrofitManager;
 import io.reactivex.Observable;
 
 /**
